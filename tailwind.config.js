@@ -6,7 +6,9 @@ module.exports = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+    './src/**/*.{js,ts,jsx,tsx}',
+    "./index.html",
+  ],
   theme: {
     container: {
       center: true,
@@ -16,6 +18,11 @@ module.exports = {
       },
     },
     extend: {
+      backgroundImage: {
+        'backgroundLogin': 'url("/src/assets/backgroundLogin.jpg"',
+        // style={{backgroundImage: }}
+        'footer-texture': "url('/img/footer-texture.png')",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -23,7 +30,7 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#560bad",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
