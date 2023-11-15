@@ -1,51 +1,128 @@
 import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button';
-import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from 'react-hook-form';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { toast } from "@/components/ui/use-toast"
+
+import { XCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
+
+import axios from "axios";
+import validator from 'validator';
+import { Terminal } from "lucide-react";
+
 
 export default function Login() {
-  return (
-    <div className="flex justify-center items-center h-screen bg-cover" style={{ backgroundImage: 'url("/src/assets/backgroundLogin.jpg"' }}>
-      <div className="flex-col items-center justify-center w-[70%] h-[80%] bg-white rounded-xl">
-        <h1 className="font-light text-3xl mt-6 text-center">
-          <span className="font-semibold">ToDo</span>list
-        </h1>
+   const [errosInputs, setErrorInputs] = useState();
+   const [errorBool, setErrorBool] = useState(false)
+   const [isLoadingSave, setIsLoadingSave] = useState(false)
 
-        <div className="flex items-center justify-around w-full ">
-          <div className="w-64 flex flex-col gap-10">
+   const navigate = useNavigate()
+   const {
+      register,
+      handleSubmit,
+      watch,
+      formState: { errors },
+   } = useForm()
 
-            <div>
-              <p className="text-muted-foreground">Digite seu email</p>
-              <Input />
-            </div>
 
-            <div>
-              <p className="text-muted-foreground">Digite sua senha</p>
-              <Input />
+   const onSubmit = async (data) => {
+      event.preventDefault();
+      setIsLoadingSave(true)
+      try {
+         const response = await axios.post('http://localhost:3000/login', {
+            email: data.email,
+            password: data.password
+         });
 
-              <div className="mt-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox />
-                  <p className="text-muted-foreground">Lembrar-me</p>
-                </div>
-                <p className="text-primary cursor-pointer">Esqueceu a senha?</p>
-              </div>
-            </div>
+         const token = response.data.access_token;
+         sessionStorage.setItem('token', token);
 
-            <Button >
-              Fazer login
-            </Button>
+         navigate('/home');
 
-            <Separator />
-          </div>
+         setErrorInputs(false);
+         setErrorBool(true)
 
-          <div className="border border-gray-100 h-80"></div>
+         toast({
+            title: "Login feito com sucesso.",
+          })
+      } catch (error) {
+         setErrorBool(true)
+         setErrorInputs(error.response.data.message);
+         setIsLoadingSave(true)
+      } finally {
+         setIsLoadingSave(false)
+      }
+      setIsLoadingSave(false);
+   };
 
-          <div className="w-1/2">
-            <img src="/src/assets/Reading list-rafiki.svg" alt="" />
-          </div>
-        </div>
+   return (
+      <div className="flex justify-center items-center h-screen bg-no-repeat bg-cover " style={{ backgroundImage: 'url("/src/assets/backgroundLogin.jpg"' }}>
+         <div className="border border-[#262626] bg-[#1A1A1A] rounded-2xl drop-shadow-2xl">
+
+            <form onSubmit={handleSubmit(onSubmit)} className="w-80 sm:w-[360px] md:w-[400px]  flex flex-col justify-center gap-6 p-8 ">
+               <img className="w-48" src="/src/assets/logo.svg" alt="" />
+               <h1 className="text-3xl font-bold text-primary font-poppins">Faça o login para acessar sua conta.</h1>
+               <div className="flex flex-col gap-1 w-full" >
+                  <p className="text-muted-foreground text-sm">Digite seu email</p>
+
+                  <Input
+                     className={`text-white ${errors?.email?.type === "required" ? "border-red-500" : ''}`}
+                     type="email"
+                     name="email"
+                     {...register("email", { required: true })}
+                  />
+                  {errors.email && <span className="text-red-500">Email obrigatório</span>}
+               </div>
+
+
+               <div className="flex flex-col gap-1 w-full">
+                  <p className="text-muted-foreground text-sm">Digite sua senha</p>
+                  <Input
+                     className={`text-white ${errors?.password?.type === "required" ? "border-red-500" : ''}`}
+                     type="password"
+                     name="password"
+                     {...register("password", { required: true })}
+                  />
+                  {errors.password && <span className="text-red-500">Senha obrigatória</span>}
+
+
+                  <div className="mt-2 flex justify-between gap-2">
+                     <div className="flex items-center gap-2">
+                        <Checkbox />
+                        <p className="text-muted-foreground text-sm">Lembrar-me</p>
+                     </div>
+                     <p className="text-primary cursor-pointer text-sm">Esqueceu a senha?</p>
+                  </div>
+               </div>
+
+               {errorBool ?
+                  <Alert variant={"destructive"} className="bg-red-500">
+                     <XCircle color="#ffffff" />
+                     <AlertTitle className="text-white">Erro ao fazer login!</AlertTitle>
+                     <AlertDescription className="text-white">
+                        {errosInputs}
+                     </AlertDescription>
+                  </Alert> : ''
+               }
+
+               {!isLoadingSave ?
+                  <Button type="submit">
+                     Fazer login
+                  </Button>
+                  :
+                  <Button type="submit" disabled>
+                     <Loader2 Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                     Entrando...
+                  </Button>
+               }
+
+               <p className="text-muted-foreground text-center">Ainda não tem uma conta? <span className="text-primary cursor-pointer">Criar conta</span></p>
+            </form>
+         </div>
       </div>
-    </div>
-  )
+   )
 }

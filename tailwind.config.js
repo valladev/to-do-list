@@ -25,12 +25,12 @@ module.exports = {
       },
       colors: {
         border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
+        input: "#262626",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#560bad",
+          DEFAULT: "#4EA8DE",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -77,7 +77,14 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      fontFamily: {
+        'poppins': ['Poppins', 'sans-serif']
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  // eslint-disable-next-line no-undef
+  plugins: [require("tailwindcss-animate"),
+  // eslint-disable-next-line no-undef
+  require('@tailwindcss/typography')
+  ],
 }
