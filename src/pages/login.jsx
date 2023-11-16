@@ -11,9 +11,6 @@ import { XCircle } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
 import axios from "axios";
-import validator from 'validator';
-import { Terminal } from "lucide-react";
-
 
 export default function Login() {
    const [errosInputs, setErrorInputs] = useState();
@@ -24,7 +21,7 @@ export default function Login() {
    const {
       register,
       handleSubmit,
-      watch,
+      //watch,
       formState: { errors },
    } = useForm()
 
@@ -41,13 +38,16 @@ export default function Login() {
          const token = response.data.access_token;
          sessionStorage.setItem('token', token);
 
-         navigate('/home');
+         // eslint-disable-next-line no-undef
+
+         navigate('/dashboard');
 
          setErrorInputs(false);
          setErrorBool(true)
 
          toast({
-            title: "Login feito com sucesso.",
+            variant: "save",
+            title: "Login feito com sucesso!",
           })
       } catch (error) {
          setErrorBool(true)
@@ -75,7 +75,7 @@ export default function Login() {
                      name="email"
                      {...register("email", { required: true })}
                   />
-                  {errors.email && <span className="text-red-500">Email obrigatório</span>}
+                  {errors.email && <span className="text-red-500 text-sm">Email obrigatório</span>}
                </div>
 
 
@@ -87,7 +87,7 @@ export default function Login() {
                      name="password"
                      {...register("password", { required: true })}
                   />
-                  {errors.password && <span className="text-red-500">Senha obrigatória</span>}
+                  {errors.password && <span className="text-red-500 text-sm">Senha obrigatória</span>}
 
 
                   <div className="mt-2 flex justify-between gap-2">
