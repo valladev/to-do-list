@@ -11,6 +11,11 @@ export default function DashboardPage() {
    const token = sessionStorage.getItem('token');
 
    const [userName, setUserName] = useState('');
+   const [userEmail, setUserEmail] = useState('');
+   const [totalCategories, setTotalCategories] = useState(0);
+   const [taskData, setTaskData] = useState([]);
+   const [listData, setListData] = useState([]);
+
    const [firstNameInitial, setFirstNameInitial] = useState('');
    const [lastNameInitial, setLastNameInitial] = useState('');
 
@@ -23,26 +28,26 @@ export default function DashboardPage() {
          };
 
          const userResponse = await axios.get('http://localhost:3000/me', config);
-         const { name } = userResponse.data;
-
-         setUserName(name);
-
-         const nameParts = name.split(' ');
-
-         // Obter as iniciais do primeiro e último nome
-         const firstNameInitial = nameParts.length > 0 ? nameParts[0].charAt(0) : '';
-         console.log("🚀 ~ file: dashboard.tsx:36 ~ fetchUserData ~ firstNameInitial:", firstNameInitial)
-         const lastNameInitial = nameParts.length > 1 ? nameParts[1].charAt(0) : '';
-         console.log("🚀 ~ file: dashboard.tsx:38 ~ fetchUserData ~ lastNameInitial:", lastNameInitial)
-
-         setFirstNameInitial(firstNameInitial);
-         setLastNameInitial(lastNameInitial);
 
          const tasksResponse = await axios.get('http://localhost:3000/tasks', config);
-         console.log(tasksResponse.data);
 
-         const categoriesResponse = await axios.get('http://localhost:3000/categories', config);
-         console.log(categoriesResponse.data);
+         const totalCategoriesResponse = await axios.get('http://localhost:3000/categories/total', config);
+         const listsResponse = await axios.get('http://localhost:3000/todo-lists', config);
+         
+         const { name, email } = userResponse.data;
+         
+         const nameParts = name.split(' ');
+         
+         const firstNameInitial = nameParts.length > 0 ? nameParts[0].charAt(0) : '';
+         const lastNameInitial = nameParts.length > 1 ? nameParts[1].charAt(0) : '';
+         
+         setUserName(name);
+         setUserEmail(email)
+         setTotalCategories(totalCategoriesResponse.data)
+         setTaskData(tasksResponse.data)
+         setListData(listsResponse.data)
+         setFirstNameInitial(firstNameInitial);
+         setLastNameInitial(lastNameInitial);
 
       } catch (error) {
          console.error(error);
@@ -63,6 +68,8 @@ export default function DashboardPage() {
                      <UserNav 
                         firstNameInitial={firstNameInitial}
                         lastNameInitial={lastNameInitial}
+                        userEmail={userEmail}
+                        userName={userName}
                         />
                   </div>
                </div>
@@ -72,7 +79,11 @@ export default function DashboardPage() {
                   <h2 className="text-3xl text-primary font-bold tracking-tight">Dashboard</h2>
                </div>
 
-               <CardsInfo />
+               <CardsInfo
+                  totalCategories={totalCategories}
+                  totalTasks={taskData}
+                  totalLists={listData}
+               />
 
                <CardsAdd />
 

@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+
 import { Avatar, AvatarFallback }
  from "@/components/ui/avatar"
  import { Button } from "@/components/ui/button";
@@ -13,7 +13,8 @@ import { Avatar, AvatarFallback }
    DropdownMenuTrigger,
  } from "@/components/ui/dropdown-menu"
   
- export function UserNav({ firstNameInitial, lastNameInitial }) {
+ // eslint-disable-next-line react/prop-types
+ export function UserNav({ firstNameInitial, lastNameInitial, userName, userEmail }) {
    return (
      <DropdownMenu>
        <DropdownMenuTrigger asChild>
@@ -26,9 +27,9 @@ import { Avatar, AvatarFallback }
        <DropdownMenuContent className="w-56" align="end" forceMount>
          <DropdownMenuLabel className="font-normal">
            <div className="flex flex-col space-y-1">
-             <p className="text-sm font-medium leading-none">shadcn</p>
+             <p className="text-sm font-medium leading-none">{userName}</p>
              <p className="text-xs leading-none text-muted-foreground">
-               m@example.com
+               {userEmail}
              </p>
            </div>
          </DropdownMenuLabel>

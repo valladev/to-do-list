@@ -1,4 +1,4 @@
-import * as React from 'react';
+/* eslint-disable react/prop-types */
 
 import { CalendarCheck2, Layers3, List } from 'lucide-react';
 
@@ -9,7 +9,7 @@ import {
    CardTitle
 } from "@/components/ui/card";
 
-export default function CardsInfo({  }) {
+export default function CardsInfo({ totalCategories, totalTasks, totalLists }) {
    return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 ">
          <Card className='bg-transparent border-[#262626]'>
@@ -23,7 +23,7 @@ export default function CardsInfo({  }) {
             </CardHeader>
 
             <CardContent>
-               <div className="text-2xl text-white font-bold">9</div>
+               <div className="text-2xl text-white font-bold">{totalLists.total}</div>
             </CardContent>
          </Card>
 
@@ -38,7 +38,7 @@ export default function CardsInfo({  }) {
             </CardHeader>
 
             <CardContent>
-               <div className="text-2xl font-bold text-white">17</div>
+               <div className="text-2xl font-bold text-white">{totalTasks.total}</div>
             </CardContent>
          </Card>
 
@@ -51,7 +51,7 @@ export default function CardsInfo({  }) {
             </CardHeader>
 
             <CardContent>
-               <div className="text-2xl font-bold text-white">13</div>
+               <div className="text-2xl font-bold text-white">{totalCategories.total}</div>
             </CardContent>
          </Card>
       </div>
