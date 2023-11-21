@@ -1,16 +1,12 @@
-import { useEffect } from 'react';
 import { UserNav } from "@/components/user-nav";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Separator } from '../components/ui/separator';
-import { Checkbox } from "@/components/ui/checkbox"
-
-
 
 import CardsInfo from '@/components/cards-info';
 import axios from 'axios';
-import { Trash2 } from 'lucide-react';
+import Task from "../components/task";
 
 export default function DashboardPage() {
   const token = sessionStorage.getItem('token');
@@ -61,26 +57,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleTaskCompletion = async (taskId) => {
-    try {
-      await axios.put(`http://localhost:3000/tasks/${taskId}`, null, config);
 
-      setTaskData((prevTaskData) => {
-        const updatedTasks = prevTaskData.tasks.map((task) => {
-          if (task.id === taskId) {
-            return { ...task, completed: true };
-          }
-          return task;
-        });
-
-        setTaskCompleted(updatedTasks.filter((task) => task.completed).length)
-
-        return { ...prevTaskData, tasks: updatedTasks };
-      });
-    } catch (error) {
-      console.error("Erro ao marcar a tarefa como concluída:", error);
-    }
-  };
 
   const fetchUserData = async () => {
     try {
@@ -146,8 +123,9 @@ export default function DashboardPage() {
 
           <Separator className='my-8' />
 
-          <div className='flex gap-4 h-16'>
+          <form className='flex gap-4 h-16'>
             <Input
+              required
               className='h-full' placeholder='Adicione uma nova task'
               value={newTaskName}
               onChange={(e) => setNewTaskName(e.target.value)}
@@ -158,7 +136,7 @@ export default function DashboardPage() {
             >
               Criar
             </Button>
-          </div>
+          </form>
 
           <div className='flex items-start bg pt-8 gap-2 flex-col md:flex-row justify-between' >
             <div className='flex items-center gap-2 text-xl'>
@@ -176,53 +154,13 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {taskData && taskData.tasks && taskData.tasks.slice().reverse().map((task) => (
+          <Task
+            taskData={taskData}
+            setTaskData={setTaskData}
+            setTaskCompleted={setTaskCompleted}
+            config={config}
+          />
 
-            task.completed !== true ? (
-              <div key={task.id} className='border border-[#333333] bg-[#262626] h-20 rounded-xl flex justify-start items-center p-4'>
-                <div className="flex justify-between w-full">
-                  <div className='flex items-center space-x-2'>
-                    <Checkbox
-                      id={task.id}
-                      onClick={() => handleTaskCompletion(task.id)}
-                    />
-                    <p
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xl text-[#F2F2F2]"
-                    >
-                      {task.description}
-                    </p>
-                  </div>
-
-                  <Button variant={"ghost"}>
-                    <Trash2 color='#D9D9D9' />
-                  </Button>
-                </div>
-              </div>)
-              :
-              (
-                <div key={task.id} className='border border-[#333333] bg-[#262626] h-20 rounded-xl flex justify-start items-center p-4'>
-                  <div className="flex justify-between w-full">
-                    <div className='flex items-center space-x-2'>
-                      <Checkbox
-                        id={task.id}
-                        checked={task.completed}
-                        onClick={() => handleTaskCompletion(task.id)}
-                      />
-                      <p
-                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-xl text-[#F2F2F2] ${task.completed ? 'line-through' : ''
-                          }`}
-                      >
-                        {task.description}
-                      </p>
-                    </div>
-
-                    <Button variant={"ghost"}>
-                      <Trash2 color='#D9D9D9' />
-                    </Button>
-                  </div>
-                </div>
-              )
-          ))}
         </div>
       </div>
     </div>
