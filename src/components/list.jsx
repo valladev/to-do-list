@@ -1,12 +1,9 @@
-import * as React from 'react';
-
+// eslint-disable-next-line react/prop-types
 import {
    Card,
    CardContent,
-   CardDescription,
    CardHeader,
-   CardTitle,
-   CardFooter,
+   CardTitle
 } from "@/components/ui/card";
 
 import {
@@ -14,9 +11,17 @@ import {
    AccordionContent,
    AccordionItem,
    AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
-export default function List() {
+// eslint-disable-next-line react/prop-types
+export default function List( ) {
+
+   if (!Array.isArray(listData)) {
+      return null;
+   }
+
+   console.log(listData);
+
    return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 ">
          <Card className="col-span-4 bg-transparent border border-[#262626]">
@@ -25,12 +30,14 @@ export default function List() {
             </CardHeader>
             <CardContent>
                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="item-1">
-                     <AccordionTrigger className='text-white'>Is it accessible?</AccordionTrigger>
-                     <AccordionContent className='text-white'>
-                        Yes. It adheres to the WAI-ARIA design pattern.
-                     </AccordionContent>
-                  </AccordionItem>
+               {listData.map((list, index) => (
+                     <AccordionItem key={index} value={`item-${index + 1}`}>
+                        <AccordionTrigger className='text-white'>{list}</AccordionTrigger>
+                        <AccordionContent className='text-white'>
+                           Yes. It adheres to the WAI-ARIA design pattern.
+                        </AccordionContent>
+                     </AccordionItem>
+                  ))}
                   <AccordionItem value="item-2">
                      <AccordionTrigger className='text-white'>Is it styled?</AccordionTrigger>
                      <AccordionContent className='text-white'>

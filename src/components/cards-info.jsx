@@ -9,7 +9,7 @@ import {
    CardTitle
 } from "@/components/ui/card";
 
-export default function CardsInfo({ totalCategories, totalTasks, totalLists }) {
+export default function CardsInfo({ totalCategories, totalTasks, totalLists, updateTaskData }) {
    return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 ">
          <Card className='bg-transparent border-[#262626]'>
