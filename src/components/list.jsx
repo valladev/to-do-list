@@ -1,61 +1,134 @@
-// eslint-disable-next-line react/prop-types
+import PropTypes from 'prop-types';
 import {
-   Card,
-   CardContent,
-   CardHeader,
-   CardTitle
-} from "@/components/ui/card";
-
-import {
-   Accordion,
-   AccordionContent,
-   AccordionItem,
-   AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
+import axios from "axios";
+import { useState } from "react";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Send } from "lucide-react";
+import Task from "../components/task";
 
-// eslint-disable-next-line react/prop-types
-export default function List( ) {
+export default function List({ config, listData, setListsTaskData, setTaskCompleted }) {
+  const [newTaskNames, setNewTaskNames] = useState({});
 
-   if (!Array.isArray(listData)) {
-      return null;
-   }
+  const handleCreateTaskInList = async (listId) => {
+    try {
+      const newTask = {
+        description: newTaskNames[listId] || '',
+        completed: false,
+      };
 
-   console.log(listData);
+      const response = await axios.post(`http://localhost:3000/todo-lists/${listId}`, newTask, config);
+      const createdTask = response.data;
 
-   return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 ">
-         <Card className="col-span-4 bg-transparent border border-[#262626]">
-            <CardHeader>
-               <CardTitle className='text-white'>Listas</CardTitle>
-            </CardHeader>
-            <CardContent>
-               <Accordion type="single" collapsible className="w-full">
-               {listData.map((list, index) => (
-                     <AccordionItem key={index} value={`item-${index + 1}`}>
-                        <AccordionTrigger className='text-white'>{list}</AccordionTrigger>
-                        <AccordionContent className='text-white'>
-                           Yes. It adheres to the WAI-ARIA design pattern.
-                        </AccordionContent>
-                     </AccordionItem>
-                  ))}
-                  <AccordionItem value="item-2">
-                     <AccordionTrigger className='text-white'>Is it styled?</AccordionTrigger>
-                     <AccordionContent className='text-white'>
-                        Yes. It comes with default styles that matches the other
-                        components&apos; aesthetic.
-                     </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3">
-                     <AccordionTrigger className='text-white'>Is it animated?</AccordionTrigger>
-                     <AccordionContent className='text-white'>
-                        Yes. It&apos;s animated by default, but you can disable it if you
-                        prefer.
-                     </AccordionContent>
-                  </AccordionItem>
-               </Accordion>
+      setListsTaskData((prevData) => {
+        if (Array.isArray(prevData)) {
+          const updatedLists = prevData.map((list) => {
+            if (list.id === listId) {
+              return {
+                ...list,
+                tasks: [...list.tasks, createdTask],
+              };
+            }
+            return list;
+          });
+          return updatedLists;
+        } else {
+          console.error("Erro: prevData não é um array");
+          return prevData;
+        }
+      });
 
-            </CardContent>
-         </Card>
-      </div>
-   )
+      setNewTaskNames((prevNames) => ({
+        ...prevNames,
+        [listId]: '',
+      }));
+    } catch (error) {
+      console.error("Erro ao criar uma nova tarefa na lista:", error);
+    }
+  };
+
+  const handleTaskCompletion = async (listId, taskId) => {
+    try {
+      setListsTaskData((prevData) => {
+        if (Array.isArray(prevData)) {
+          const updatedLists = prevData.map((list) => {
+            if (list.id === listId) {
+              const updatedTasks = list.tasks.map((task) => {
+                if (task.id === taskId) {
+                  return { ...task, completed: !task.completed };
+                }
+                return task;
+              });
+              return { ...list, tasks: updatedTasks };
+            }
+            return list;
+          });
+          return updatedLists;
+        } else {
+          console.error("Erro: prevData não é um array");
+          return prevData;
+        }
+      });
+
+      await axios.put(`http://localhost:3000/tasks/${taskId}`, { completed: true }, config);
+    } catch (error) {
+      console.error("Erro ao marcar a tarefa como concluída:", error);
+    }
+  };
+  
+  return (
+    <div className="flex flex-col gap-4">
+      {listData &&
+        listData.map((list) => (
+          <Accordion key={list.id} type="single" collapsible>
+            <AccordionItem value={list.id}>
+              <AccordionTrigger className="text-white font-semibold text-xl px-2">{list.name}</AccordionTrigger>
+              <form className='flex gap-4 p-2 h-16'>
+                <Input
+                  required
+                  className='h-full'
+                  placeholder='Adicione uma nova task'
+                  value={newTaskNames[list.id] || ''}
+                  onChange={(e) => {
+                    setNewTaskNames((prevNames) => ({
+                      ...prevNames,
+                      [list.id]: e.target.value,
+                    }));
+                  }}
+                />
+                <Button
+                  className='h-full w-24 text-lg'
+                  onClick={(e) => {
+                    handleCreateTaskInList(list.id);
+                    e.preventDefault();
+                  }}
+                >
+                  <Send />
+                </Button>
+              </form>
+              <AccordionContent className="flex flex-col gap-2">
+                <Task
+                  taskData={list.tasks}
+                  setTaskData={setListsTaskData}
+                  setTaskCompleted={(taskId) => handleTaskCompletion(taskId, list.id)}
+                  config={config}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+    </div>
+  );
 }
+
+List.propTypes = {
+  config: PropTypes.object.isRequired,
+  listData: PropTypes.array.isRequired,
+  setListsTaskData: PropTypes.func.isRequired,
+  setTaskCompleted: PropTypes.func.isRequired,
+};

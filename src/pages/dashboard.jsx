@@ -3,9 +3,19 @@ import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Separator } from '../components/ui/separator';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 import CardsInfo from '@/components/cards-info';
 import axios from 'axios';
+import { Send } from 'lucide-react';
+import List from '../components/list';
 import Task from "../components/task";
 
 export default function DashboardPage() {
@@ -13,12 +23,17 @@ export default function DashboardPage() {
 
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [userId, setUserId] = useState('');
   const [totalCategories, setTotalCategories] = useState(0);
-  const [taskData, setTaskData] = useState({ tasks: [] });
+  const [taskData, setTaskData] = useState([]);
   const [listData, setListData] = useState([]);
+  const [listDataTotal, setListDataTotal] = useState([]);
+  const [categoryData, setCategoryData] = useState([])
   const [newTaskName, setNewTaskName] = useState('');
+  const [newListName, setNewListName] = useState('');
   const [taskCompleted, setTaskCompleted] = useState(0);
   const [listCompleted, setListCompleted] = useState(0);
+  const [listsTaskData, setListsTaskData] = useState([]);
 
   const [firstNameInitial, setFirstNameInitial] = useState('');
   const [lastNameInitial, setLastNameInitial] = useState('');
@@ -27,7 +42,6 @@ export default function DashboardPage() {
     const nameParts = name.split(' ');
     const firstNameInitial = nameParts.length > 0 ? nameParts[0].charAt(0) : '';
     const lastNameInitial = nameParts.length > 1 ? nameParts[1].charAt(0) : '';
-
 
     setFirstNameInitial(firstNameInitial);
     setLastNameInitial(lastNameInitial);
@@ -57,32 +71,44 @@ export default function DashboardPage() {
     }
   };
 
+  const handleCreateList = async () => {
+    try {
+      const newList = {
+        name: newListName,
+        userId: userId
+      };
 
+      await axios.post('http://localhost:3000/todo-lists', newList, config);
+
+      window.location.reload();
+
+      setNewTaskName('');
+
+    } catch (error) {
+      console.error("Erro ao criar uma nova tarefa:", error);
+    }
+  };
 
   const fetchUserData = async () => {
     try {
       const userResponse = await axios.get('http://localhost:3000/me', config)
-
       const tasksResponse = await axios.get('http://localhost:3000/tasks', config)
-      console.log("🚀 ~ file: dashboard.jsx:43 ~ fetchUserData ~ tasksResponse:", tasksResponse)
-
       const totalCategoriesResponse = await axios.get('http://localhost:3000/categories', config)
-
       const listsResponse = await axios.get('http://localhost:3000/todo-lists', config)
-      console.log("🚀 ~ file: dashboard.jsx:49 ~ fetchUserData ~ listsResponse:", listsResponse)
-
-
-      const { name, email } = userResponse.data;
+      const { id, name, email } = userResponse.data;
 
       formatName(name)
 
+      setUserId(id);
       setUserName(name);
       setUserEmail(email)
       setTotalCategories(totalCategoriesResponse.data)
       setTaskData(tasksResponse.data)
-      setListData(listsResponse.data)
+      setListData(listsResponse.data.lists)
       setTaskCompleted(tasksResponse.data.totalCompleted)
       setListCompleted(listsResponse.data.totalCompleted)
+      setListDataTotal(listsResponse.data)
+      setCategoryData(totalCategoriesResponse.data)
 
     } catch (error) {
       console.error(error);
@@ -117,13 +143,13 @@ export default function DashboardPage() {
           <CardsInfo
             totalCategories={totalCategories}
             totalTasks={taskData}
-            totalLists={listData}
+            totalLists={listDataTotal}
             updateTaskData={setTaskData}
           />
 
           <Separator className='my-8' />
 
-          <form className='flex gap-4 h-16'>
+          <form className='flex gap-4 h-12'>
             <Input
               required
               className='h-full' placeholder='Adicione uma nova task'
@@ -134,7 +160,24 @@ export default function DashboardPage() {
               className='h-full w-24 text-lg'
               onClick={handleCreateTask}
             >
-              Criar
+              <Send />
+            </Button>
+          </form>
+
+          <Separator className='my-8' />
+
+          <form className='flex gap-4 h-12'>
+            <Input
+              required
+              className='h-full' placeholder='Adicione uma nova list'
+              value={newListName}
+              onChange={(e) => setNewListName(e.target.value)}
+            />
+            <Button
+              className='h-full w-24 text-lg'
+              onClick={handleCreateList}
+            >
+              <Send />
             </Button>
           </form>
 
@@ -146,6 +189,17 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            <Select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue className="text-white" placeholder="Categorias" />
+              </SelectTrigger>
+                <SelectContent>
+                  <SelectItem></SelectItem>
+                </SelectContent>
+            </Select>
+
+
+
             <div className='flex items-center gap-2 text-xl'>
               <p className='text-secondary-foreground font-semibold'>Listas Concluídas</p>
               <div className='w-10 bg-[#333333] flex justify-center items-center rounded-3xl'>
@@ -154,8 +208,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          <List
+            listData={listData}
+            config={config}
+            setListsTaskData={setListsTaskData}
+            setTaskCompleted={setTaskCompleted}
+          />
+
           <Task
-            taskData={taskData}
+            taskData={taskData.tasks}
             setTaskData={setTaskData}
             setTaskCompleted={setTaskCompleted}
             config={config}
